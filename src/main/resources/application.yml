@@ -12,3 +12,9 @@ management:
     web:
       exposure:
         include: health,info
+
+courshare:
+  jwt:
+    secret: ${JWT_SECRET:dev-secret-key-change-in-production-min-256-bits-long!!}
+    access-token-expiration: 15m
+    refresh-token-expiration: 7d
