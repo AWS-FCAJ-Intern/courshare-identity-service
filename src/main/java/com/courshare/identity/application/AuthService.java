@@ -64,9 +64,19 @@ public class AuthService {
         }
         userRepository.save(user);
 
-        Role studentRole = roleRepository.findByName(DEFAULT_ROLE)
-                .orElseThrow(() -> new NotFoundException("Default role not found: " + DEFAULT_ROLE));
-        userRoleRepository.save(new UserRole(user.getId(), studentRole.getId()));
+        String requestedRole = request.role();
+        if (requestedRole == null || requestedRole.isBlank()) {
+            requestedRole = DEFAULT_ROLE;
+        } else {
+            requestedRole = requestedRole.toUpperCase().trim();
+        }
+
+        String finalRole = requestedRole;
+        Role targetRole = roleRepository.findByName(finalRole)
+                .orElseGet(() -> roleRepository.findByName(DEFAULT_ROLE)
+                        .orElseThrow(() -> new NotFoundException("Default role not found: " + DEFAULT_ROLE)));
+        
+        userRoleRepository.save(new UserRole(user.getId(), targetRole.getId()));
 
         return issueTokens(user);
     }
