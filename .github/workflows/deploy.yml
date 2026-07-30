@@ -7,8 +7,8 @@ on:
 
 env:
   AWS_REGION: ap-southeast-1                   # Vùng AWS (Singapore)
-  ECR_REPOSITORY: courshare-enrollment-service  # Tên ECR Repository chứa ảnh Docker của service này
-  ECS_SERVICE: enrollment-service-v2           # Tên ECS Service đang chạy trên Cluster
+  ECR_REPOSITORY: courshare-identity-service  # Tên ECR Repository chứa ảnh Docker của service này
+  ECS_SERVICE: identity-service-v2            # Tên ECS Service đang chạy trên Cluster
   ECS_CLUSTER: default                         # Tên ECS Cluster của bạn (ở đây là "default")
   ECS_TASK_DEFINITION: .aws/task-definition.json # Đường dẫn tới file task-definition vừa chuẩn bị ở Bước 2
   CONTAINER_NAME: Main                         # Tên container được đặt trong Task Definition (ở đây là "Main")
