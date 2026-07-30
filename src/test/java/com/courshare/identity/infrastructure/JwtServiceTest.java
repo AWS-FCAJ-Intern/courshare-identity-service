@@ -21,7 +21,8 @@ class JwtServiceTest {
         properties.setSecret("test-secret-key-with-enough-length-for-hmac-sha256!!");
         properties.setAccessTokenExpiration(Duration.ofMinutes(15));
         properties.setRefreshTokenExpiration(Duration.ofDays(7));
-        jwtService = new JwtService(properties);
+        com.courshare.identity.config.RsaKeyProperties rsaProperties = new com.courshare.identity.config.RsaKeyProperties();
+        jwtService = new JwtService(properties, rsaProperties);
     }
 
     @Test

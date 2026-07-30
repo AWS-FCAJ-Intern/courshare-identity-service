@@ -25,7 +25,7 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/", "/actuator/**", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
+                        .requestMatchers("/", "/actuator/**", "/swagger-ui/**", "/v3/api-docs/**", "/.well-known/jwks.json").permitAll()
                         .requestMatchers(HttpMethod.POST, "/auth/register", "/auth/login", "/auth/refresh", "/auth/logout").permitAll()
                         .requestMatchers(HttpMethod.GET, "/auth/validate").permitAll()
                         .requestMatchers("/profile/**").authenticated()
