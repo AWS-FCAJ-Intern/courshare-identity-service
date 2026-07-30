@@ -28,7 +28,8 @@ public class SecurityConfig {
                         .requestMatchers("/", "/actuator/**", "/swagger-ui/**", "/v3/api-docs/**", "/.well-known/jwks.json").permitAll()
                         .requestMatchers(HttpMethod.POST, "/auth/register", "/auth/login", "/auth/refresh", "/auth/logout").permitAll()
                         .requestMatchers(HttpMethod.GET, "/auth/validate").permitAll()
-                        .requestMatchers("/profile/**").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/profile/public/**").permitAll()
+                        .requestMatchers("/profile", "/profile/**").authenticated()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);

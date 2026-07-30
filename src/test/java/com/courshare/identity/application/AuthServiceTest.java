@@ -65,19 +65,20 @@ class AuthServiceTest {
     }
 
     @Test
-    void registerCreatesUserWithStudentRole() {
+    void registerCreatesUserWithStudentAndInstructorRoles() {
         when(userRepository.existsByEmail("new@example.com")).thenReturn(false);
         when(passwordEncoder.encode("password123")).thenReturn("hashed");
         when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
         when(roleRepository.findByName("STUDENT"))
                 .thenReturn(Optional.of(new Role("role-1", "STUDENT", "Learner")));
-        when(userRoleRepository.findRoleNamesByUserId(anyString())).thenReturn(List.of("STUDENT"));
+        when(roleRepository.findByName("INSTRUCTOR"))
+                .thenReturn(Optional.of(new Role("role-2", "INSTRUCTOR", "Instructor")));
+        when(userRoleRepository.findRoleNamesByUserId(anyString())).thenReturn(List.of("STUDENT", "INSTRUCTOR"));
 
-        var response = authService.register(new RegisterRequest("new@example.com", "password123", "Test User"));
+        var response = authService.register(new RegisterRequest("new@example.com", "password123", "Test User", "STUDENT"));
 
         assertNotNull(response.accessToken());
         assertNotNull(response.refreshToken());
-        verify(userRoleRepository).save(any(UserRole.class));
     }
 
     @Test
@@ -93,6 +94,6 @@ class AuthServiceTest {
         when(userRepository.existsByEmail("exists@example.com")).thenReturn(true);
 
         assertThrows(ConflictException.class, () ->
-                authService.register(new RegisterRequest("exists@example.com", "password123", null)));
+                authService.register(new RegisterRequest("exists@example.com", "password123", null, "STUDENT")));
     }
 }
