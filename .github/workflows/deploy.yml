@@ -46,7 +46,10 @@ jobs:
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
           echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
-
+      - name: Debug - inspect task-definition.json bytes
+        run: |
+          xxd .aws/task-definition.json | head -1
+          cat .aws/task-definition.json | head -c 100
       # 5. Cập nhật ID ảnh Docker mới vào cấu hình ECS Task Definition
       - name: Fill in the new image ID in the Amazon ECS task definition
         id: task-def
