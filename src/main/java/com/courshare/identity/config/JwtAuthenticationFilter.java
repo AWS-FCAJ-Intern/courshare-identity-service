@@ -32,26 +32,48 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             HttpServletResponse response,
             FilterChain filterChain
     ) throws ServletException, IOException {
-        String header = request.getHeader(HttpHeaders.AUTHORIZATION);
-        if (header != null && header.startsWith("Bearer ")) {
-            String token = header.substring(7);
-            try {
-                Claims claims = jwtService.parseToken(token);
-                if (jwtService.isAccessToken(claims)) {
-                    @SuppressWarnings("unchecked")
-                    List<String> roles = claims.get(JwtService.CLAIM_ROLES, List.class);
-                    var authorities = roles.stream()
-                            .map(role -> new SimpleGrantedAuthority("ROLE_" + role))
-                            .toList();
-                    var authentication = new UsernamePasswordAuthenticationToken(
-                            claims.getSubject(),
-                            null,
-                            authorities
-                    );
-                    SecurityContextHolder.getContext().setAuthentication(authentication);
+        String gatewayUserId = request.getHeader("X-User-Id");
+        String gatewayRolesHeader = request.getHeader("X-User-Roles");
+
+        if (gatewayUserId != null && !gatewayUserId.isBlank()) {
+            List<SimpleGrantedAuthority> authorities;
+            if (gatewayRolesHeader != null && !gatewayRolesHeader.isBlank()) {
+                authorities = java.util.Arrays.stream(gatewayRolesHeader.split(","))
+                        .map(String::trim)
+                        .filter(role -> !role.isBlank())
+                        .map(role -> new SimpleGrantedAuthority("ROLE_" + role))
+                        .toList();
+            } else {
+                authorities = java.util.Collections.emptyList();
+            }
+            var authentication = new UsernamePasswordAuthenticationToken(
+                    gatewayUserId,
+                    null,
+                    authorities
+            );
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+        } else {
+            String header = request.getHeader(HttpHeaders.AUTHORIZATION);
+            if (header != null && header.startsWith("Bearer ")) {
+                String token = header.substring(7);
+                try {
+                    Claims claims = jwtService.parseToken(token);
+                    if (jwtService.isAccessToken(claims)) {
+                        @SuppressWarnings("unchecked")
+                        List<String> roles = claims.get(JwtService.CLAIM_ROLES, List.class);
+                        var authorities = roles.stream()
+                                .map(role -> new SimpleGrantedAuthority("ROLE_" + role))
+                                .toList();
+                        var authentication = new UsernamePasswordAuthenticationToken(
+                                claims.getSubject(),
+                                null,
+                                authorities
+                        );
+                        SecurityContextHolder.getContext().setAuthentication(authentication);
+                    }
+                } catch (JwtException ignored) {
+                    SecurityContextHolder.clearContext();
                 }
-            } catch (JwtException ignored) {
-                SecurityContextHolder.clearContext();
             }
         }
         filterChain.doFilter(request, response);

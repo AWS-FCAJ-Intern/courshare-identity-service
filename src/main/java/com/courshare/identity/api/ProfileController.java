@@ -45,4 +45,11 @@ public class ProfileController {
     ) {
         profileService.changePassword(authentication.getName(), request);
     }
+
+    @GetMapping("/public/{userId}")
+    public com.courshare.identity.api.dto.PublicProfileResponse getPublicProfile(
+            @org.springframework.web.bind.annotation.PathVariable String userId
+    ) {
+        return profileService.getPublicProfile(userId);
+    }
 }

@@ -36,6 +36,16 @@ public class ProfileService {
         return toResponse(user, roles);
     }
 
+    @Transactional(readOnly = true)
+    public com.courshare.identity.api.dto.PublicProfileResponse getPublicProfile(String userId) {
+        User user = findUser(userId);
+        return new com.courshare.identity.api.dto.PublicProfileResponse(
+                user.getId(),
+                user.getEmail(),
+                user.getFullName() != null ? user.getFullName() : "Anonymous User"
+        );
+    }
+
     @Transactional
     public ProfileResponse updateProfile(String userId, UpdateProfileRequest request) {
         User user = findUser(userId);
