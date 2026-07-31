@@ -48,7 +48,6 @@ class AuthServiceTest {
     @BeforeEach
     void setUp() {
         JwtProperties properties = new JwtProperties();
-        properties.setSecret("test-secret-key-with-enough-length-for-hmac-sha256!!");
         properties.setAccessTokenExpiration(Duration.ofMinutes(15));
         properties.setRefreshTokenExpiration(Duration.ofDays(7));
         com.courshare.identity.config.RsaKeyProperties rsaProperties = new com.courshare.identity.config.RsaKeyProperties();
