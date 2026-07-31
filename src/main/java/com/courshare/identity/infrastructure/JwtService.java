@@ -120,6 +120,8 @@ public class JwtService {
                     .and()
                 .id(UUID.randomUUID().toString())
                 .subject(userId)
+                .claim("iss", jwtProperties.getIssuer())
+                .claim("aud", jwtProperties.getAudience())
                 .claim("email", email)
                 .claim(CLAIM_ROLES, roles)
                 .claim(CLAIM_TYPE, type)
