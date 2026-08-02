@@ -42,6 +42,10 @@ class AuthServiceTest {
     private PasswordEncoder passwordEncoder;
     @Mock
     private RefreshTokenStore refreshTokenStore;
+    @Mock
+    private OtpService otpService;
+    @Mock
+    private EmailService emailService;
 
     private AuthService authService;
 
@@ -59,22 +63,25 @@ class AuthServiceTest {
                 passwordEncoder,
                 jwtService,
                 refreshTokenStore,
-                properties
+                properties,
+                otpService,
+                emailService
         );
     }
 
     @Test
     void registerCreatesUserWithStudentAndInstructorRoles() {
         when(userRepository.existsByEmail("new@example.com")).thenReturn(false);
+        when(otpService.verifyOtp("new@example.com", "123456")).thenReturn(true);
         when(passwordEncoder.encode("password123")).thenReturn("hashed");
         when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
         when(roleRepository.findByName("STUDENT"))
-                .thenReturn(Optional.of(new Role("role-1", "STUDENT", "Learner")));
+                 .thenReturn(Optional.of(new Role("role-1", "STUDENT", "Learner")));
         when(roleRepository.findByName("INSTRUCTOR"))
-                .thenReturn(Optional.of(new Role("role-2", "INSTRUCTOR", "Instructor")));
+                 .thenReturn(Optional.of(new Role("role-2", "INSTRUCTOR", "Instructor")));
         when(userRoleRepository.findRoleNamesByUserId(anyString())).thenReturn(List.of("STUDENT", "INSTRUCTOR"));
 
-        var response = authService.register(new RegisterRequest("new@example.com", "password123", "Test User", "STUDENT"));
+        var response = authService.register(new RegisterRequest("new@example.com", "password123", "Test User", "STUDENT", "123456"));
 
         assertNotNull(response.accessToken());
         assertNotNull(response.refreshToken());
@@ -93,6 +100,15 @@ class AuthServiceTest {
         when(userRepository.existsByEmail("exists@example.com")).thenReturn(true);
 
         assertThrows(ConflictException.class, () ->
-                authService.register(new RegisterRequest("exists@example.com", "password123", null, "STUDENT")));
+                authService.register(new RegisterRequest("exists@example.com", "password123", null, "STUDENT", "123456")));
+    }
+
+    @Test
+    void registerFailsWhenOtpIsInvalid() {
+        when(userRepository.existsByEmail("new@example.com")).thenReturn(false);
+        when(otpService.verifyOtp("new@example.com", "invalid-otp")).thenReturn(false);
+
+        assertThrows(AuthException.class, () ->
+                authService.register(new RegisterRequest("new@example.com", "password123", "Test User", "STUDENT", "invalid-otp")));
     }
 }

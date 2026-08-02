@@ -48,10 +48,21 @@ class AuthControllerTest {
         mockMvc.perform(post("/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
-                                {"email":"user@example.com","password":"password123","fullName":"User"}
+                                {"email":"user@example.com","password":"password123","fullName":"User","otp":"123456"}
                                 """))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.accessToken").value("access"));
+    }
+
+    @Test
+    void sendOtpReturnsOk() throws Exception {
+        mockMvc.perform(post("/auth/register/send-otp")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"email":"newuser@example.com"}
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("Verification code sent successfully"));
     }
 
     @Test

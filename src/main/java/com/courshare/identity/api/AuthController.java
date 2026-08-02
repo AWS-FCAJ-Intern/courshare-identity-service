@@ -5,9 +5,11 @@ import com.courshare.identity.api.dto.LoginRequest;
 import com.courshare.identity.api.dto.LogoutRequest;
 import com.courshare.identity.api.dto.RefreshRequest;
 import com.courshare.identity.api.dto.RegisterRequest;
+import com.courshare.identity.api.dto.SendOtpRequest;
 import com.courshare.identity.api.dto.ValidateResponse;
 import com.courshare.identity.application.AuthService;
 import jakarta.validation.Valid;
+import java.util.Map;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,6 +28,13 @@ public class AuthController {
 
     public AuthController(AuthService authService) {
         this.authService = authService;
+    }
+
+    @PostMapping("/register/send-otp")
+    @ResponseStatus(HttpStatus.OK)
+    public Map<String, String> sendOtp(@Valid @RequestBody SendOtpRequest request) {
+        authService.sendOtp(request);
+        return Map.of("message", "Verification code sent successfully");
     }
 
     @PostMapping("/register")

@@ -3,6 +3,7 @@ package com.courshare.identity.application;
 import com.courshare.identity.api.dto.AuthResponse;
 import com.courshare.identity.api.dto.LoginRequest;
 import com.courshare.identity.api.dto.RegisterRequest;
+import com.courshare.identity.api.dto.SendOtpRequest;
 import com.courshare.identity.api.dto.ValidateResponse;
 import com.courshare.identity.config.JwtProperties;
 import com.courshare.identity.domain.Role;
@@ -11,6 +12,7 @@ import com.courshare.identity.domain.User;
 import com.courshare.identity.domain.UserRepository;
 import com.courshare.identity.domain.UserRole;
 import com.courshare.identity.domain.UserRoleRepository;
+import com.courshare.identity.infrastructure.EmailService;
 import com.courshare.identity.infrastructure.JwtService;
 import com.courshare.identity.infrastructure.RefreshTokenStore;
 import io.jsonwebtoken.Claims;
@@ -33,6 +35,8 @@ public class AuthService {
     private final JwtService jwtService;
     private final RefreshTokenStore refreshTokenStore;
     private final JwtProperties jwtProperties;
+    private final OtpService otpService;
+    private final EmailService emailService;
 
     public AuthService(
             UserRepository userRepository,
@@ -41,7 +45,9 @@ public class AuthService {
             PasswordEncoder passwordEncoder,
             JwtService jwtService,
             RefreshTokenStore refreshTokenStore,
-            JwtProperties jwtProperties
+            JwtProperties jwtProperties,
+            OtpService otpService,
+            EmailService emailService
     ) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
@@ -50,12 +56,28 @@ public class AuthService {
         this.jwtService = jwtService;
         this.refreshTokenStore = refreshTokenStore;
         this.jwtProperties = jwtProperties;
+        this.otpService = otpService;
+        this.emailService = emailService;
+    }
+
+    public void sendOtp(SendOtpRequest request) {
+        if (userRepository.existsByEmail(request.email())) {
+            throw new ConflictException("Email already registered");
+        }
+
+        String otp = otpService.generateOtp();
+        otpService.saveOtp(request.email(), otp);
+        emailService.sendVerificationCode(request.email(), otp);
     }
 
     @Transactional
     public AuthResponse register(RegisterRequest request) {
         if (userRepository.existsByEmail(request.email())) {
             throw new ConflictException("Email already registered");
+        }
+
+        if (!otpService.verifyOtp(request.email(), request.otp())) {
+            throw new AuthException("Invalid or expired verification code");
         }
 
         User user = new User(request.email(), passwordEncoder.encode(request.password()));
