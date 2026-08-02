@@ -9,6 +9,7 @@ import com.courshare.identity.domain.User;
 import com.courshare.identity.domain.UserRepository;
 import com.courshare.identity.domain.UserRole;
 import com.courshare.identity.domain.UserRoleRepository;
+import com.courshare.identity.infrastructure.EmailService;
 import com.courshare.identity.infrastructure.JwtService;
 import com.courshare.identity.infrastructure.RefreshTokenStore;
 import org.junit.jupiter.api.BeforeEach;
