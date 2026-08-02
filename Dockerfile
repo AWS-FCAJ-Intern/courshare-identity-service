@@ -7,5 +7,6 @@ RUN apk add --no-cache maven && mvn -q package -DskipTests
 FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app
 COPY --from=build /app/target/*.jar app.jar
+COPY certs/ /app/certs/
 EXPOSE 8081
 ENTRYPOINT ["java", "-jar", "app.jar"]
